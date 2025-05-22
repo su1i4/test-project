@@ -1,0 +1,57 @@
+{
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "registerLink": "Don't have an account? Register",
+      "success": "Successfully signed in",
+      "error": "Sign in error",
+      "description": "Enter your credentials to access your account"
+    },
+    "register": {
+      "title": "Create an Account",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "loginLink": "Already have an account? Sign In",
+      "success": "Successfully registered",
+      "error": "Registration error",
+      "description": "Fill in the form to create your account"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "email": "Email",
+    "registrationDate": "Registration Date",
+    "subscriptions": "Subscriptions",
+    "noSubscriptions": "No active subscriptions",
+    "profileInfo": "Account Information",
+    "profileDescription": "Your personal information",
+    "loading": "Loading profile...",
+    "error": "Profile loading error",
+    "noData": "Profile data is not available"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "empty": "No messages",
+    "loading": "Loading messages...",
+    "error": "Error loading messages"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "logout": "Logout"
+  },
+  "header": {
+    "profile": "Profile",
+    "chat": "Chat",
+    "language": "Language",
+    "theme": "Theme",
+    "logout": "Logout"
+  }
+} 
