@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Определяем интерфейс пользователя
 interface User {
   id: string;
   email: string;
@@ -11,14 +10,11 @@ interface User {
   subscriptions: string[];
 }
 
-// Константа для пути к файлу хранения пользователей (симуляция БД)
 const USERS_FILE_PATH = path.join(process.cwd(), 'users.json');
 
-// Функция для чтения данных пользователей
 function readUsers(): User[] {
   try {
     if (!fs.existsSync(USERS_FILE_PATH)) {
-      // Если файл не существует, создаем его с начальными данными
       const initialUsers: User[] = [
         {
           id: '1',
@@ -47,7 +43,6 @@ function readUsers(): User[] {
   }
 }
 
-// Функция для сохранения данных пользователей
 function saveUsers(users: User[]): void {
   try {
     fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(users, null, 2));
@@ -58,11 +53,9 @@ function saveUsers(users: User[]): void {
 
 export async function POST(request: NextRequest) {
   try {
-    // Получаем данные запроса
     const body = await request.json();
     const { email, password } = body;
 
-    // Проверяем наличие обязательных полей
     if (!email || !password) {
       return NextResponse.json(
         { message: 'Отсутствуют обязательные поля' },
@@ -70,10 +63,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Получаем существующих пользователей
     const users = readUsers();
 
-    // Проверяем, существует ли пользователь с таким email
     if (users.some((user: User) => user.email === email)) {
       return NextResponse.json(
         { message: 'Пользователь с таким email уже существует' },
@@ -81,7 +72,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Создаем нового пользователя
     const newUser: User = {
       id: (users.length + 1).toString(),
       email,
@@ -90,11 +80,9 @@ export async function POST(request: NextRequest) {
       subscriptions: []
     };
 
-    // Добавляем пользователя в "базу данных"
     users.push(newUser);
     saveUsers(users);
 
-    // Возвращаем успешный ответ
     return NextResponse.json(
       { message: 'Регистрация успешна' },
       { status: 201 }

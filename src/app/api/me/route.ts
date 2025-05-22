@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
-import * as fs from 'fs';
-import * as path from 'path';
 
-// Определяем интерфейсы
 interface User {
   id: string;
   email: string;
@@ -12,28 +9,25 @@ interface User {
   subscriptions: string[];
 }
 
-// Секретный ключ для проверки JWT токенов
 const JWT_SECRET = new TextEncoder().encode('test-secret-key');
 
-// Константа для пути к файлу хранения пользователей
-const USERS_FILE_PATH = path.join(process.cwd(), 'users.json');
-
-// Функция для чтения данных пользователей
-function readUsers(): User[] {
-  try {
-    if (!fs.existsSync(USERS_FILE_PATH)) {
-      return [];
-    }
-
-    const data = fs.readFileSync(USERS_FILE_PATH, 'utf8');
-    return JSON.parse(data) as User[];
-  } catch (error) {
-    console.error('Ошибка при чтении данных пользователей:', error);
-    return [];
+const USERS: User[] = [
+  {
+    id: '1',
+    email: 'test@example.com',
+    password: 'password123',
+    registrationDate: '2024-01-15T12:00:00Z',
+    subscriptions: ['Basic Plan', 'Premium Content']
+  },
+  {
+    id: '2',
+    email: 'sulaimanmind862@gmail.com',
+    password: '123123',
+    registrationDate: '2024-01-15T12:00:00Z',
+    subscriptions: ['Basic Plan', 'Premium Content']
   }
-}
+];
 
-// Функция для проверки JWT токена
 async function verifyToken(token: string) {
   try {
     const { payload } = await jose.jwtVerify(token, JWT_SECRET);
@@ -44,26 +38,37 @@ async function verifyToken(token: string) {
   }
 }
 
+function addCorsHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Получаем заголовок авторизации
     const authHeader = request.headers.get('Authorization');
     
-    // Проверяем наличие заголовка авторизации
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader) {
       return NextResponse.json(
-        { message: 'Требуется авторизация' },
+        { message: 'Заголовок Authorization отсутствует' },
         { status: 401 }
       );
     }
     
-    // Получаем токен из заголовка
+    if (!authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { message: 'Неверный формат заголовка Authorization, должен начинаться с "Bearer "' },
+        { status: 401 }
+      );
+    }
+    
     const token = authHeader.split(' ')[1];
     
-    // Проверяем токен
+    console.log('Токен получен, первые 10 символов:', token.substring(0, 10));
+    
     const payload = await verifyToken(token);
     
-    // Проверяем валидность токена
     if (!payload || !payload.sub) {
       return NextResponse.json(
         { message: 'Недействительный токен' },
@@ -71,11 +76,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Ищем пользователя в "базе данных"
-    const users = readUsers();
-    const user = users.find(u => u.id === payload.sub);
+    const user = USERS.find(u => u.id === payload.sub);
     
-    // Если пользователь не найден, возвращаем ошибку
     if (!user) {
       return NextResponse.json(
         { message: 'Пользователь не найден' },
@@ -83,16 +85,28 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Удаляем пароль из ответа
     const { password, ...userWithoutPassword } = user;
     
-    // Возвращаем данные пользователя
-    return NextResponse.json(userWithoutPassword, { status: 200 });
+    return addCorsHeaders(NextResponse.json(userWithoutPassword, { status: 200 }));
   } catch (error) {
     console.error('Ошибка при получении профиля:', error);
-    return NextResponse.json(
-      { message: 'Внутренняя ошибка сервера' },
+    return addCorsHeaders(NextResponse.json(
+      { 
+        message: 'Внутренняя ошибка сервера',
+        error: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
-    );
+    ));
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return NextResponse.json({}, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
+  });
 } 
